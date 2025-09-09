@@ -18,5 +18,7 @@ print(len(word))   #length of string
 
 print(word.endswith("data"))  #check string end with 
 print(word.startswith("hell"))  #check string with 
-print(word.capitalize())        #capital the start textx
+print(word.capitalize())        #capital the start text
+
+
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rev Motors AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+        }
+        #rev-logo-h1 {
+            width: 250px;
+            height: 250px;
+            margin-bottom: 20px;
+            /* Placeholder for your GIF */
+            background-color: #ccc; 
+            border-radius: 50%;
+            display: block;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        #startButton {
+            background-color: #4CAF50; /* Green */
+        }
+        #stopButton {
+            background-color: #f44336; /* Red */
+        }
+        #revertButton {
+            background-color: #008CBA; /* Blue */
+        }
+        .button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="images/Rev.gif" alt="Rev Logo" id="rev-logo-h1">
+        
+        <div class="buttons">
+            <button id="startButton" class="button">Start</button>
+            <button id="stopButton" class="button">Stop</button>
+            <button id="revertButton" class="button">Revert</button>
+        </div>
+    </div>
+
+    <script>
+        const wsUrl = 'ws://localhost:3000'; // Change if your server is on a different address
+        let ws;
+
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const revertButton = document.getElementById('revertButton');
+
+        function connectWebSocket() {
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                // You can send a start signal to the backend if needed
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.audio) {
+                    // Handle incoming audio data
+                    console.log('Received audio data:', data.audio.length);
+                    // Here you would play the audio or perform some action
+                }
+                if (data.interrupted) {
+                    console.log('Model was interrupted.');
+                }
+                if (data.error) {
+                    console.error('Error from server:', data.error);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+            };
+        }
+
+        startButton.addEventListener('click', () => {
+            console.log('Start button clicked');
+            if (!ws || ws.readyState === WebSocket.CLOSED) {
+                connectWebSocket();
+            }
+            // Logic to handle start functionality (e.g., enable microphone access)
+        });
+
+        stopButton.addEventListener('click', () => {
+            console.log('Stop button clicked');
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // To stop the conversation, you would close the WebSocket connection.
+                ws.close();
+            }
+        });
+
+        revertButton.addEventListener('click', () => {
+            console.log('Revert button clicked');
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // Send a reset message to your backend to clear the session
+                ws.send(JSON.stringify({ reset: true }));
+            }
+        });
+
+        // Initial connection attempt on page load
+        connectWebSocket();
+    </script>
+</body>
+</html>
